@@ -5,37 +5,45 @@ public class MoveableObject : MonoBehaviour
 {
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference jumpAction;
+    [SerializeField] private InputActionReference jumpHoldAction;
     private Vector3 dir;
     [SerializeField] private float speed = 2f;
-    [SerializeField] private float jumpForce = 2f;
+
+    [SerializeField] private float maxJumpForce;
     [SerializeField] private const int maxJumps = 2;
+
+    private float jumpForce;
+    private bool higherJump = false;
     private bool isFalling = false;
     private int currentJump = 0;
 
+    private float normalJumpHeight;
+    private float highJumpHeight;
+    private float maxJumpHeight;
 
     [SerializeField] Rigidbody rb;
     private bool isJumpRequested;
 
     private void OnEnable()
     {
+        jumpForce = maxJumpForce;
+
+        normalJumpHeight = (Vector3.up.y) * (jumpForce / 2);
+        highJumpHeight = (Vector3.up.y) * jumpForce;
+        maxJumpHeight = normalJumpHeight;
+
         dir = new Vector3(0f, 0f, 0f);
 
-        //en el momento que entra en la accion
-        moveAction.action.started += HandleMoveInput;
         //cada vez que cambia el valor
         moveAction.action.performed += HandleMoveInput;
         //cuando se queda quieto.
         moveAction.action.canceled += HandleMoveInput;
 
         jumpAction.action.started += HandleJumpInput;
+
+        jumpHoldAction.action.performed += HandleJumpHoldInputPerformed;
+        jumpHoldAction.action.canceled += HandleJumpHoldInputCanceled;
     }
-
-    //private void Update()
-    //{
-    //    this.transform.Translate(dir * speed * Time.deltaTime);
-    //    // rider4 es mej or
-
-    //}
 
     private void FixedUpdate()
     {
@@ -55,11 +63,17 @@ public class MoveableObject : MonoBehaviour
 
                 currentJump = 0;
             }
+
             if (!isFalling)
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            {
+                if (rb.transform.position.y <= rb.transform.position.y + maxJumpHeight)
+                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
 
             isJumpRequested = false;
         }
+
+        Debug.Log(jumpForce);
     }
 
     private void HandleMoveInput(InputAction.CallbackContext ctx)
@@ -69,7 +83,28 @@ public class MoveableObject : MonoBehaviour
 
     private void HandleJumpInput(InputAction.CallbackContext ctx)
     {
-        if (!isFalling)
-            isJumpRequested = true;
+        isJumpRequested = true;
+    }
+
+    private void HandleJumpHoldInputPerformed(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("Performed");
+
+        jumpForce = maxJumpForce;
+
+        maxJumpHeight = highJumpHeight;
+
+        higherJump = true;
+    }
+
+    private void HandleJumpHoldInputCanceled(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("Canceled");
+        jumpForce = maxJumpForce / 2;
+
+        maxJumpHeight = normalJumpHeight;
+
+        if (higherJump)
+            higherJump = false;
     }
 }
