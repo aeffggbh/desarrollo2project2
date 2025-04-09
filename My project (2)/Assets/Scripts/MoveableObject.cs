@@ -8,6 +8,11 @@ public class MoveableObject : MonoBehaviour
     private Vector3 dir;
     [SerializeField] private float speed = 2f;
     [SerializeField] private float jumpForce = 2f;
+    [SerializeField] private const int maxJumps = 2;
+    private bool isFalling = false;
+    private int currentJump = 0;
+
+
     [SerializeField] Rigidbody rb;
     private bool isJumpRequested;
 
@@ -36,9 +41,23 @@ public class MoveableObject : MonoBehaviour
     {
         rb.AddForce(new Vector3(dir.x, 0, dir.y) * Time.fixedDeltaTime * speed, ForceMode.Impulse);
 
+        if (this.transform.position.y < 1f && isFalling)
+        {
+            isFalling = false;
+        }
+
         if (isJumpRequested)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            currentJump++;
+            if (currentJump > maxJumps)
+            {
+                isFalling = true;
+
+                currentJump = 0;
+            }
+            if (!isFalling)
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+
             isJumpRequested = false;
         }
     }
@@ -50,6 +69,7 @@ public class MoveableObject : MonoBehaviour
 
     private void HandleJumpInput(InputAction.CallbackContext ctx)
     {
-        isJumpRequested = true;
+        if (!isFalling)
+            isJumpRequested = true;
     }
 }
