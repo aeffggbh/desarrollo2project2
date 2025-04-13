@@ -28,12 +28,37 @@ public class MoveableObject : MonoBehaviour
     {
         jumpForce = maxJumpForce / 2;
 
-        normalJumpHeight = (Vector3.up.y) * (jumpForce / 2);
-        highJumpHeight = (Vector3.up.y) * jumpForce;
-        maxJumpHeight = normalJumpHeight;
+        //normalJumpHeight = (Vector3.up.y) * (jumpForce / 2);
+        //highJumpHeight = (Vector3.up.y) * jumpForce;
+        //maxJumpHeight = normalJumpHeight;
 
         dir = new Vector3(0f, 0f, 0f);
 
+        SetInputFunctions();
+    }
+
+    private void FixedUpdate()
+    {
+        rb.AddForce(new Vector3(dir.x, 0, dir.y) * Time.fixedDeltaTime * speed, ForceMode.Impulse);
+
+        if (isJumpRequested)
+        {
+            CheckMaxJumps();
+
+            CheckGrounded();
+            
+            if (!isFalling)
+            {
+                Jump();
+            }
+
+            isJumpRequested = false;
+        }
+
+    }
+
+    private void SetInputFunctions()
+    {
         //cada vez que cambia el valor
         moveAction.action.performed += HandleMoveInput;
         //cuando se queda quieto.
@@ -42,40 +67,33 @@ public class MoveableObject : MonoBehaviour
         jumpAction.action.started += HandleJumpInput;
 
         jumpHoldAction.action.performed += HandleJumpHoldInputPerformed;
+
         jumpHoldAction.action.canceled += HandleJumpHoldInputCanceled;
     }
 
-    private void FixedUpdate()
+    private void CheckMaxJumps()
     {
-        rb.AddForce(new Vector3(dir.x, 0, dir.y) * Time.fixedDeltaTime * speed, ForceMode.Impulse);
-
-
-        if (isJumpRequested)
+        if (currentJump == maxJumps)
         {
-            if (currentJump == maxJumps)
-            {
-                isFalling = true;
-                currentJump = 0;
-            }
-
-            if (this.transform.position.y <= 1f)
-            {
-                isFalling = false;
-                currentJump = 0;
-            }
-
-            if (!isFalling)
-            {
-                //if (rb.transform.position.y <= rb.transform.position.y + maxJumpHeight)
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-                currentJump++;
-            }
-
-            isJumpRequested = false;
-            Debug.Log(isFalling);
-            Debug.Log(currentJump);
+            isFalling = true;
+            currentJump = 0;
         }
+    }
 
+    private void CheckGrounded()
+    {
+        if (this.transform.position.y <= 1f)
+        {
+            isFalling = false;
+            currentJump = 0;
+        }
+    }
+
+    private void Jump()
+    {
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+
+        currentJump++;
     }
 
     private void HandleMoveInput(InputAction.CallbackContext ctx)
