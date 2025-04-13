@@ -26,7 +26,7 @@ public class MoveableObject : MonoBehaviour
 
     private void OnEnable()
     {
-        jumpForce = maxJumpForce;
+        jumpForce = maxJumpForce / 2;
 
         normalJumpHeight = (Vector3.up.y) * (jumpForce / 2);
         highJumpHeight = (Vector3.up.y) * jumpForce;
@@ -49,31 +49,33 @@ public class MoveableObject : MonoBehaviour
     {
         rb.AddForce(new Vector3(dir.x, 0, dir.y) * Time.fixedDeltaTime * speed, ForceMode.Impulse);
 
-        if (this.transform.position.y < 1f && isFalling)
-        {
-            isFalling = false;
-        }
 
         if (isJumpRequested)
         {
-            currentJump++;
-            if (currentJump > maxJumps)
+            if (currentJump == maxJumps)
             {
                 isFalling = true;
+                currentJump = 0;
+            }
 
+            if (this.transform.position.y <= 1f)
+            {
+                isFalling = false;
                 currentJump = 0;
             }
 
             if (!isFalling)
             {
-                if (rb.transform.position.y <= rb.transform.position.y + maxJumpHeight)
-                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                //if (rb.transform.position.y <= rb.transform.position.y + maxJumpHeight)
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                currentJump++;
             }
 
             isJumpRequested = false;
+            Debug.Log(isFalling);
+            Debug.Log(currentJump);
         }
 
-        Debug.Log(jumpForce);
     }
 
     private void HandleMoveInput(InputAction.CallbackContext ctx)
@@ -88,23 +90,23 @@ public class MoveableObject : MonoBehaviour
 
     private void HandleJumpHoldInputPerformed(InputAction.CallbackContext ctx)
     {
-        Debug.Log("Performed");
+        //Debug.Log("Performed");
 
-        jumpForce = maxJumpForce;
+        //jumpForce = maxJumpForce;
 
-        maxJumpHeight = highJumpHeight;
+        //maxJumpHeight = highJumpHeight;
 
-        higherJump = true;
+        //higherJump = true;
     }
 
     private void HandleJumpHoldInputCanceled(InputAction.CallbackContext ctx)
     {
-        Debug.Log("Canceled");
-        jumpForce = maxJumpForce / 2;
+        //Debug.Log("Canceled");
+        //jumpForce = maxJumpForce / 2;
 
-        maxJumpHeight = normalJumpHeight;
+        //maxJumpHeight = normalJumpHeight;
 
-        if (higherJump)
-            higherJump = false;
+        //if (higherJump)
+        //    higherJump = false;
     }
 }
