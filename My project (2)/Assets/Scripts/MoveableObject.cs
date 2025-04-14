@@ -59,9 +59,8 @@ public class MoveableObject : MonoBehaviour
 
     private void SetInputFunctions()
     {
-        //cada vez que cambia el valor
         moveAction.action.performed += HandleMoveInput;
-        //cuando se queda quieto.
+
         moveAction.action.canceled += HandleMoveInput;
 
         jumpAction.action.started += HandleJumpInput;
@@ -108,7 +107,7 @@ public class MoveableObject : MonoBehaviour
 
     private void HandleJumpHoldInputPerformed(InputAction.CallbackContext ctx)
     {
-        //Debug.Log("Performed");
+        Debug.Log("Performed");
 
         //jumpForce = maxJumpForce;
 
@@ -119,7 +118,7 @@ public class MoveableObject : MonoBehaviour
 
     private void HandleJumpHoldInputCanceled(InputAction.CallbackContext ctx)
     {
-        //Debug.Log("Canceled");
+        Debug.Log("Canceled");
         //jumpForce = maxJumpForce / 2;
 
         //maxJumpHeight = normalJumpHeight;
